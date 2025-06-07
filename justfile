@@ -17,19 +17,7 @@ init-clasp:
         // The script ID can be found in the Apps Script IDE under project settings
         "scriptId": process.env.GAPPS_SCRIPTID
             ?? (() => { throw new Error("GAPPS_SCRIPTID env var missing") })(),
-        "rootDir": "src",
-        "scriptExtensions": [
-            ".js",
-            ".gs"
-        ],
-        "htmlExtensions": [
-            ".html"
-        ],
-        "jsonExtensions": [
-            ".json"
-        ],
-        "filePushOrder": [],
-        "skipSubdirectories": false
+        "rootDir": "src"
     }
 
     await Bun.write('.clasp.json', JSON.stringify(config, null, 2))
