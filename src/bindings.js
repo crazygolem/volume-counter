@@ -19,12 +19,12 @@ function countVolumes(input) {
     else {
       range = SpreadsheetApp.getActive().getRange(ref.join('!'))
     }
-    return count(flatten_(cleanupRange_(range, range.getSheet()).getValues()))
+    return count(flatten(cleanupRange(range, range.getSheet()).getValues()))
   }
   catch (e) {
     // Immediate value or range inside a nested formula
     if (input.map && input[0].map)
-      return count(flatten_(input))
+      return count(flatten(input))
     else
       return count([input])
   }
@@ -39,12 +39,12 @@ function uiCount() {
   var values = []
   for (var i = 0; i < ranges.length; i++) {
     var range = ranges[i]
-    range = cleanupRange_(range, SpreadsheetApp.getActiveSheet())
-    values = values.concat(flatten_(range.getValues()))
+    range = cleanupRange(range, SpreadsheetApp.getActiveSheet())
+    values = values.concat(flatten(range.getValues()))
   }
-  
+
   var result = count(values)
-  
+
   var html = HtmlService.createHtmlOutput(result)
   SpreadsheetApp.getUi()
       .showModalDialog(html, 'Number of volumes')
