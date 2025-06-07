@@ -1,0 +1,6 @@
+{
+  "dependencies": {},
+  "devDependencies": {
+    "@google/clasp": "^3.0.6-alpha"
+  }
+}
