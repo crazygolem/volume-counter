@@ -1,28 +1,3 @@
-/**********************************************************************************************************************
-
-Script to parse human-readable book volumes lists and count them.
-
-As the format of those lists is too complex for simple regexes, the peggy library (https://peggyjs.org) is used to
-parse a grammar that generates an efficient parser for the lists.
-
-**********************************************************************************************************************/
-
-
-// Libraries loader ///////////////////////////////////////////////////////////////////////////////////////////////////
-// Inspired by https://ctrlq.org/code/20380-load-external-javascript-with-eval
-(function(libs) {
-  Object.keys(libs).forEach(function(name) {
-    src = (function(url) { eval(UrlFetchApp.fetch(url).getContentText()) })(libs[name]);
-    eval('var ' + name + ' = ' + src);
-  })
-})({
-  // The key will become the name of a variable under which the library will be available
-  // The value is the URL to the external library's source
-  peggy: "https://unpkg.com/peggy@5.0.3/browser/peggy.min.js"
-})
-
-
-// Rules loader ///////////////////////////////////////////////////////////////////////////////////////////////////////
 // It doesn't seem possible to save arbitrary files along Google App Script scripts, so the rules must be stored in an
 // XML file (with an HTML extension apparently).
 // The file must have the following format:
