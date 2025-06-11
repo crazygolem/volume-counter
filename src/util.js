@@ -1,15 +1,9 @@
-function countRangeList(rangeList) {
-  var ranges = SpreadsheetApp.getSelection().getActiveRangeList().getRanges()
-  var values = []
-  for (var i = 0; i < ranges.length; i++) {
-    var range = ranges[i]
-    range = cleanupRange(range, SpreadsheetApp.getActiveSheet())
-    values = values.concat(flatten(range.getValues()))
-  }
-  return count(values)
-}
+/**
+ * Clamp a range with unbounded end to the last row / column with data.
+ */
+function clampRange(range) {
+  var activeSheet = range.getSheet()
 
-function cleanupRange(range, activeSheet) {
   // Unbounded ranges become bounded after an offset is applied, so we have to call offset only once at the end
   var startRow = 0
   var numRows = range.getNumRows()
@@ -20,8 +14,8 @@ function cleanupRange(range, activeSheet) {
   Logger.log('Initial bounds: %s %s %s %s', range.isStartRowBounded(), range.isEndRowBounded(), range.isStartColumnBounded(), range.isEndColumnBounded())
 
   if (!range.isStartRowBounded()) {
-    startRow = 1
-    numRows -= 1
+    startRow = activeSheet.getFrozenRows()
+    numRows -= startRow
   }
   if (!range.isEndRowBounded()) {
     if (range.getLastRow() > activeSheet.getLastRow()) // selection goes beyond last row with content
@@ -29,8 +23,8 @@ function cleanupRange(range, activeSheet) {
   }
 
   if (!range.isStartColumnBounded()) {
-    startCol = 1
-    numCols -= 1
+    startCol = activeSheet.getFrozenColumns()
+    numCols -= startCol
   }
   if (!range.isEndColumnBounded()) {
     if (range.getLastColumn() > activeSheet.getLastColumn()) // selection goes beyond last column with content
@@ -38,18 +32,8 @@ function cleanupRange(range, activeSheet) {
   }
 
   range = range.offset(startRow, startCol, numRows, numCols)
-  Logger.log('Cleaned range: %s [%s +%s : %s +%s]', range.getA1Notation(), startRow, numRows, startCol, numCols)
-  Logger.log('Cleaned bounds: %s %s %s %s', range.isStartRowBounded(), range.isEndRowBounded(), range.isStartColumnBounded(), range.isEndColumnBounded())
+  Logger.log('Clamped range: %s [%s +%s : %s +%s]', range.getA1Notation(), startRow, numRows, startCol, numCols)
+  Logger.log('Clamped bounds: %s %s %s %s', range.isStartRowBounded(), range.isEndRowBounded(), range.isStartColumnBounded(), range.isEndColumnBounded())
 
   return range
-}
-
-function flatten(input) {
-  var flattened=[]
-  for (var i=0; i<input.length; ++i) {
-    var current = input[i]
-    for (var j=0; j<current.length; ++j)
-      flattened.push(current[j])
-  }
-  return flattened
 }

@@ -1,32 +1,43 @@
 /**
- * Use this function to display in a cell the volume count of the argument, a cell or a range.
+ * Use this function to display in a cell the volume count of the argument, a
+ * cell or a range.
+ *
  * E.g.:
+ *   =COUNTVOLUMES("1-3, 6, 8-10")
  *   =COUNTVOLUMES(C23)
  *   =COUNTVOLUMES(C2:C55)
+ *   =COUNTVOLUMES(Comics!C:C)
  *
- * Note: This function does not fully support nesting or being nested, and may return incorrect
- * results in some cases (headers and extra blank rows/columns might not get correctly removed).
+ * Header rows and columns are automatically excluded if the start of the range
+ * is unbounded (e.g. `C:C55`) and the rows/columns are frozen.
+ *
+ * Since empty values are counted as 1 volume, when given a range with an
+ * unbounded end (e.g. `C2:C`), this function excludes cells past the last row
+ * or column that contains data. This is a bit finicky, and might not always
+ * work, in particular with nested functions.
  */
 function countVolumes(input) {
-  var formula = SpreadsheetApp.getActiveRange().getFormula()
-  var ref = formula.match(/=\w+\((.*)\)/i)[1].split('!') // there is always a formula; might not be this one
-
+  // When specified as a range, the `input` parameter contains the resolved
+  // values. For range with an unbounded end, this goes to the end of the
+  // document and not the end of the data.
+  // We can't easily discriminate between a value, a range or a nested formula,
+  // so we just try assuming it's a range, and if there is an exception we fall
+  // back to using the resolved values.
   try {
-    var range
-    if (ref.length == 1) {
-      range = SpreadsheetApp.getActiveSheet().getRange(ref[0])
-    }
-    else {
-      range = SpreadsheetApp.getActive().getRange(ref.join('!'))
-    }
-    return count(flatten(cleanupRange(range, range.getSheet()).getValues()))
+    var formula = SpreadsheetApp.getActiveRange().getFormula()
+    // There is always a formula (since COUNTVOLUMES was called), but it might
+    // not be a simple COUNTVOLUMES call, or not one with a simple range.
+    var ref = formula.match(/=\w+\((.*)\)/i)[1]
+
+    var range = (ref.includes('!')
+      ? SpreadsheetApp.getActive()
+      : SpreadsheetApp.getActiveSheet()
+    ).getRange(ref)
+
+    return count(clampRange(range).getValues().flat(Infinity))
   }
   catch (e) {
-    // Immediate value or range inside a nested formula
-    if (input.map && input[0].map)
-      return count(flatten(input))
-    else
-      return count([input])
+    return (input.flat) ? count(input.flat(Infinity)) : count([input])
   }
 }
 
@@ -36,12 +47,10 @@ function countVolumes(input) {
  */
 function uiCount() {
   var ranges = SpreadsheetApp.getSelection().getActiveRangeList().getRanges()
-  var values = []
-  for (var i = 0; i < ranges.length; i++) {
-    var range = ranges[i]
-    range = cleanupRange(range, SpreadsheetApp.getActiveSheet())
-    values = values.concat(flatten(range.getValues()))
-  }
+  var values = ranges
+    .map(range => clampRange(range))
+    .map(range => range.getValues())
+    .flat(Infinity)
 
   var result = count(values)
 
