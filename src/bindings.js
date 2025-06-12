@@ -1,12 +1,14 @@
 /**
- * Use this function to display in a cell the volume count of the argument, a
- * cell or a range.
+ * Sum up the number of volumes of the argument, a cell, a range or a list of
+ * ranges.
  *
- * E.g.:
+ * Examples:
+ *
  *   =COUNTVOLUMES("1-3, 6, 8-10")
  *   =COUNTVOLUMES(C23)
  *   =COUNTVOLUMES(C2:C55)
  *   =COUNTVOLUMES(Comics!C:C)
+ *   =COUNTVOLUMES(French!C:C;English!C:C)
  *
  * Header rows and columns are automatically excluded if the start of the range
  * is unbounded (e.g. `C:C55`) and the rows/columns are frozen.
@@ -27,14 +29,18 @@ function countVolumes(input) {
     var formula = SpreadsheetApp.getActiveRange().getFormula()
     // There is always a formula (since COUNTVOLUMES was called), but it might
     // not be a simple COUNTVOLUMES call, or not one with a simple range.
-    var ref = formula.match(/=\w+\((.*)\)/i)[1]
+    var refs = formula.match(/=\w+\((.*)\)/i)[1]
 
-    var range = (ref.includes('!')
-      ? SpreadsheetApp.getActive()
-      : SpreadsheetApp.getActiveSheet()
-    ).getRange(ref)
+    var values = refs.split(';')
+      .map(ref => (ref.includes('!')
+        ? SpreadsheetApp.getActive()
+        : SpreadsheetApp.getActiveSheet()
+      ).getRange(ref))
+      .map(range => clampRange(range))
+      .map(range => range.getValues())
+      .flat(Infinity)
 
-    return count(clampRange(range).getValues().flat(Infinity))
+    return count(values)
   }
   catch (e) {
     return (input.flat) ? count(input.flat(Infinity)) : count([input])
