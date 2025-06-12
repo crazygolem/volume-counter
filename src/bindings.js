@@ -50,16 +50,20 @@ function countVolumes() {
  */
 function uiCount() {
   var ranges = SpreadsheetApp.getSelection().getActiveRangeList().getRanges()
-  var values = ranges
     .map(range => clampRange(range))
+
+  var values = ranges
     .map(range => range.getValues())
     .flat(Infinity)
 
-  var result = count(values)
+  var html = `
+    <b>${count(values)}</b> volumes
+    <p>
+    in cells ${ranges.map(range => range.getA1Notation()).join(';')}
+  `
 
-  var html = HtmlService.createHtmlOutput(result)
   SpreadsheetApp.getUi()
-      .showModalDialog(html, 'Number of volumes')
+      .showModalDialog(HtmlService.createHtmlOutput(html), 'Number of volumes')
 }
 
 // Add an item to the Add-on menu, under a sub-menu whose name is set automatically.
