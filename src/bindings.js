@@ -8,13 +8,13 @@
  *     =COUNTVOLUMES(Comics!C:C)
  *     =COUNTVOLUMES(French!C:C;English!C:C)
  *
- * Header rows and columns are automatically excluded if the start of the range
- * is unbounded (e.g. `C:C55`) and the rows/columns are frozen.
+ * Header cells are automatically excluded if the start of the range is
+ * unbounded (e.g. `C:C55`). Only cells in frozen rows and columns are
+ * considered as header cells.
  *
- * Since empty values are counted as 1 volume, when given a range with an
- * unbounded end (e.g. `C2:C`), this function excludes cells past the last row
- * or column that contains data. This is a bit finicky, and might not always
- * work, in particular with nested functions.
+ * Trailing cells, i.e. cells in the selection past the last row or column with
+ * content, are always excluded. Empty cells that are not trailing are counted
+ * as 1 volume.
  */
 function countVolumes() {
   // We can't use the argument passed to the function when called from the macro
@@ -38,6 +38,7 @@ function countVolumes() {
       }
     })
     .map(range => clampRange(range))
+    .filter(x => x != null)
     .map(range => range.getValues())
     .flat(Infinity)
 
@@ -51,6 +52,7 @@ function countVolumes() {
 function uiCount() {
   var ranges = SpreadsheetApp.getSelection().getActiveRangeList().getRanges()
     .map(range => clampRange(range))
+    .filter(x => x != null)
 
   var values = ranges
     .map(range => range.getValues())

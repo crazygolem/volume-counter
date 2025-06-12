@@ -1,39 +1,38 @@
 /**
- * Clamp a range with unbounded end to the last row / column with data.
+ * Clamp a range:
+ * - header cells (in frozen rows/columns) are removed when the start of the range is unbounded
+ * - trailing cells (past the last row/column with content) are always removed
+ *
+ * As ranges must have at least one row and column, returns nothing if the clamping results in an empty range.
  */
 function clampRange(range) {
-  var activeSheet = range.getSheet()
-
   // Unbounded ranges become bounded after an offset is applied, so we have to call offset only once at the end
   var startRow = 0
   var numRows = range.getNumRows()
   var startCol = 0
   var numCols = range.getNumColumns()
 
-  Logger.log('Initial range: %s [%s +%s : %s +%s]', range.getA1Notation(), startRow, numRows, startCol, numCols)
-  Logger.log('Initial bounds: %s %s %s %s', range.isStartRowBounded(), range.isEndRowBounded(), range.isStartColumnBounded(), range.isEndColumnBounded())
-
   if (!range.isStartRowBounded()) {
-    startRow = activeSheet.getFrozenRows()
+    startRow = range.getSheet().getFrozenRows()
     numRows -= startRow
-  }
-  if (!range.isEndRowBounded()) {
-    if (range.getLastRow() > activeSheet.getLastRow()) // selection goes beyond last row with content
-      numRows -= range.getLastRow() - activeSheet.getLastRow()
   }
 
   if (!range.isStartColumnBounded()) {
-    startCol = activeSheet.getFrozenColumns()
+    startCol = range.getSheet().getFrozenColumns()
     numCols -= startCol
   }
-  if (!range.isEndColumnBounded()) {
-    if (range.getLastColumn() > activeSheet.getLastColumn()) // selection goes beyond last column with content
-    numCols -= range.getLastColumn() - activeSheet.getLastColumn()
+
+  if (range.getLastRow() > range.getSheet().getLastRow()) {
+    numRows -= range.getLastRow() - range.getSheet().getLastRow()
   }
 
-  range = range.offset(startRow, startCol, numRows, numCols)
-  Logger.log('Clamped range: %s [%s +%s : %s +%s]', range.getA1Notation(), startRow, numRows, startCol, numCols)
-  Logger.log('Clamped bounds: %s %s %s %s', range.isStartRowBounded(), range.isEndRowBounded(), range.isStartColumnBounded(), range.isEndColumnBounded())
+  if (range.getLastColumn() > range.getSheet().getLastColumn()) {
+    numCols -= range.getLastColumn() - range.getSheet().getLastColumn()
+  }
 
-  return range
+  if (numRows < 1 || numCols < 1) {
+    return
+  }
+
+  return range.offset(startRow, startCol, numRows, numCols)
 }
