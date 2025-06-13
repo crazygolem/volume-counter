@@ -84,9 +84,7 @@ function count(values) {
   let count = 0
 
   for (let i = 0; i < values.length; i++) {
-    // Handling the whitespace in the grammar is annoying, so we just remove it all here
-    let s = values[i].replace(/\s/g, '')
-    count += parser.parse(s)
+    count += parser.parse(values[i])
   }
 
   Logger.log("Number of volumes: %s", count)
