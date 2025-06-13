@@ -39,7 +39,7 @@ function countVolumes() {
     })
     .map(range => clampRange(range))
     .filter(x => x != null)
-    .map(range => range.getValues())
+    .map(range => range.getDisplayValues())
     .flat(Infinity)
 
   return count(values)
@@ -55,7 +55,7 @@ function uiCount() {
     .filter(x => x != null)
 
   var values = ranges
-    .map(range => range.getValues())
+    .map(range => range.getDisplayValues())
     .flat(Infinity)
 
   var html = `
