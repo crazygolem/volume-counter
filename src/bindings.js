@@ -23,12 +23,12 @@ function countVolumes() {
   // we have to parse the formula to get the range specification and work it
   // from there.
 
-  var formula = SpreadsheetApp.getActiveRange().getFormula()
+  let formula = SpreadsheetApp.getActiveRange().getFormula()
   // There is always a formula (since COUNTVOLUMES was called), but it might
   // not be a simple COUNTVOLUMES call, or not one with a simple range.
-  var refs = formula.match(/=.*COUNTVOLUMES\s*\(([^)]*)\)/i)[1]
+  let refs = formula.match(/=.*COUNTVOLUMES\s*\(([^)]*)\)/i)[1]
 
-  var values = refs.split(';')
+  let values = refs.split(';')
     .map(ref => {
       try {
         return SpreadsheetApp.getActive().getRange(ref)
@@ -39,8 +39,8 @@ function countVolumes() {
     })
     .map(range => clampRange(range))
     .filter(x => x != null)
-    .map(range => range.getDisplayValues())
-    .flat(Infinity)
+    .map(range => range.getDisplayValues()) // => 2D array
+    .flat(2)
 
   return count(values)
 }
@@ -50,15 +50,15 @@ function countVolumes() {
  * This function is to be called from a menu, after selecting ranges of volumes.
  */
 function uiCount() {
-  var ranges = SpreadsheetApp.getSelection().getActiveRangeList().getRanges()
+  let ranges = SpreadsheetApp.getSelection().getActiveRangeList().getRanges()
     .map(range => clampRange(range))
     .filter(x => x != null)
 
-  var values = ranges
-    .map(range => range.getDisplayValues())
-    .flat(Infinity)
+  let values = ranges
+    .map(range => range.getDisplayValues()) // => 2D array
+    .flat(2)
 
-  var html = `
+  let html = `
     <b>${count(values)}</b> volumes
     <p>
     in cells ${ranges.map(range => range.getA1Notation()).join(';')}

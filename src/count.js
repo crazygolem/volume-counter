@@ -8,19 +8,19 @@
 //     - contain the input to parse as only content (possibly in a CDATA section)
 function loadRulesFromFile(filename) {
   function getElementsByTagName(root, tag) {
-    var out = []
-    var descendents = root.getDescendants()
-    for (var i in descendents) {
-      var elt = descendents[i].asElement()
+    let out = []
+    let descendents = root.getDescendants()
+    for (let i in descendents) {
+      let elt = descendents[i].asElement()
       if (elt != null && elt.getName() == tag) out.push(elt)
     }
     return out
   }
 
   function asTests(elt) {
-    var out = []
-    var tests = getElementsByTagName(elt, 'test')
-    for (var i in tests) {
+    let out = []
+    let tests = getElementsByTagName(elt, 'test')
+    for (let i in tests) {
       out.push({
         expected: parseInt(tests[i].getAttribute('expect').getValue(), 10),
         input: tests[i].getText()
@@ -29,7 +29,7 @@ function loadRulesFromFile(filename) {
     return out
   }
 
-  var root = XmlService.parse(HtmlService.createHtmlOutputFromFile(filename).getContent()).getRootElement()
+  let root = XmlService.parse(HtmlService.createHtmlOutputFromFile(filename).getContent()).getRootElement()
   return {
     grammar: getElementsByTagName(root, 'grammar')[0].getText(),
     selftests: asTests(getElementsByTagName(root, 'selftests')[0])
@@ -40,14 +40,15 @@ function loadRulesFromFile(filename) {
 // Logs test result in GAS' debugger logs (Ctrl + Enter or View → Logs)
 // In addition, if some tests have failed, an exception is thrown.
 function selftest() {
-  var rules = loadRulesFromFile('rules') // Load parser rules from file 'rules.html'
-  var parser = peggy.generate(rules.grammar)
-  var tests = rules.selftests
+  let rules = loadRulesFromFile('rules') // Load parser rules from file 'rules.html'
+  let parser = peggy.generate(rules.grammar)
+  let tests = rules.selftests
 
-  var errors = 0
+  let errors = 0
   function test(input, expected) {
+    let actual
     try {
-      var actual = parser.parse(input)
+      actual = parser.parse(input)
     } catch (e) {
       errors++
       if (e instanceof Error) {
@@ -58,16 +59,16 @@ function selftest() {
       }
       return
     }
+
     if (expected !== actual) {
       errors++
       Logger.log("[FAIL] %s → %s; expected: %s", input, actual, expected)
-    }
-    else {
+    } else {
       Logger.log("[ OK ] %s → %s", input, actual)
     }
   }
 
-  for (var i in tests) {
+  for (let i in tests) {
     test(tests[i].input, tests[i].expected)
   }
 
@@ -77,13 +78,14 @@ function selftest() {
 }
 
 function count(values) {
-  var rules = loadRulesFromFile('rules') // Load parser rules from file 'rules.html'
-  var parser = peggy.generate(rules.grammar)
+  let rules = loadRulesFromFile('rules') // Load parser rules from file 'rules.html'
+  let parser = peggy.generate(rules.grammar)
 
-  var count = 0
+  let count = 0
 
-  for (var i = 0; i < values.length; i++) {
-    var s = values[i].replace(/\s/g, '')
+  for (let i = 0; i < values.length; i++) {
+    // Handling the whitespace in the grammar is annoying, so we just remove it all here
+    let s = values[i].replace(/\s/g, '')
     count += parser.parse(s)
   }
 

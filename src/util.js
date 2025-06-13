@@ -7,10 +7,10 @@
  */
 function clampRange(range) {
   // Unbounded ranges become bounded after an offset is applied, so we have to call offset only once at the end
-  var startRow = 0
-  var numRows = range.getNumRows()
-  var startCol = 0
-  var numCols = range.getNumColumns()
+  let startRow = 0
+  let numRows = range.getNumRows()
+  let startCol = 0
+  let numCols = range.getNumColumns()
 
   if (!range.isStartRowBounded()) {
     startRow = range.getSheet().getFrozenRows()
