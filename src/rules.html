@@ -32,7 +32,7 @@
       = Name _ '[' _ content:(List / Item) _ ']' { return content }
 
     Range
-      = start:Number _ '-' _ end:Number &{ return start < end } { return end - start + 1 }
+      = start:Number _ '-' _ end:Number !(_ Name) &{ return start < end } { return end - start + 1 }
 
     Count
       = count:Number _ '*' _ Volume? &{ return count > 0 } { return count }
@@ -44,7 +44,7 @@
       = [0-9]+ { return parseInt(text(), 10) }
 
     Name
-      = [A-Za-z0-9.' ]+
+      = [A-Za-z0-9.' -]+
 
     Empty
       = '' { return 1 }
@@ -73,5 +73,9 @@
     <test expect="12">Box[1-5],Box[6-8,10],Box[2*HS],HS</test>
     <test expect="8">Collector[Sleeve[1-3],Sleeve[4-6],2*HS]</test>
     <test expect="7">1 - 2 , Box [3 - 4 , 3 * Art Book]</test>
+    <test expect="1">Complete Collection 2000-2020</test>
+    <test expect="1">Complete 2000-2020 Collection</test>
+    <test expect="1">2000-2020 Complete Collection</test>
+    <test expect="3">2000-2020 Complete Collection [3*]</test>
   </selftests>
 </parser>
